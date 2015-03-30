@@ -11,10 +11,14 @@ The requirements for VideoSfM are:
 
 After you have the above installed, and in order to use it, run
 
-`chmod u+x VideoSfM.sh`
+```
+chmod u+x VideoSfM.sh
+```
 
 ## Usage
 
 The usage is:
 
-`./VideoSfM.sh -i {input video} -f {sampling framerate} -o {output directory}`
+```
+./VideoSfM.sh {input video} {sampling framerate} {output directory}
+```
