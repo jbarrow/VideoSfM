@@ -9,4 +9,4 @@ ffmpeg -i $1 -r $3 -f image2 $2/image-%07d.ppm
 cd src && make
 cd ../
 
-./track_features
+./track_features $2 $2

@@ -4,3 +4,5 @@ track_features
 .DS_Store
 *.a
 *.o
+*.ft
+*.txt
