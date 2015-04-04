@@ -15,6 +15,15 @@ After you have the above installed, and in order to use it, run
 chmod u+x VideoSfM.sh
 ```
 
+Although the library is made when you run `VideoSfM.sh` for the first time,
+you can also make the feature_tracker script by itself by running the following
+commands:
+
+```
+cd src
+make
+```
+
 ## Usage
 
 The usage is:
