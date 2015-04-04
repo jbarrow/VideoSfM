@@ -15,14 +15,64 @@
 
 #define DEBUG 0
 
+int nFeatures = 100, nFrames = 8;
+
 //This prints all the features in each frame
-void printFrame (int num, int nFeatures, float frame[][4]) {
+void print_frame (int num, int nFeatures, float frame[][4]) {
   printf("*****This is frame number %d \n", num);
   int j;
   for (j = 0 ; j < nFeatures ; j++)  {
           printf("Feature #%g:  (%f,%f) with value of %g\n",
                frame[j][0], frame[j][1], frame[j][2], frame[j][3]);
      }
+}
+
+void output_ceres_file(float features[nFrames][nFeatures][4], int frames, int n, char* directory) {
+  char output[512];
+  sprintf(output, "%s/features.txt", directory);
+
+  FILE *f;
+  f = fopen(output, "w");
+
+  if(f == NULL) {
+    printf("Error writing output in form for Ceres!\n");
+    exit(1);
+  }
+
+  int observations = frames * n;
+  int points = features[nFrames-1][nFeatures-1][0];
+
+  /*
+   * The first line has the format:
+   *   <num_cameras> <num_points> <num_observations>
+   *
+   * In our case, as we aren't doing phototourism, but rather videos,
+   * our line is:
+   *   <num_frames> <num_points> <num_observations>
+   */
+  fprintf(f, "%d %d %d\n", frames, points, observations);
+
+  /*
+   * The next step is to output all the point information, in the
+   * format:
+   *   <frame_index> <point_index> <x> <y>
+   */
+  int i, j;
+  for(i = 0; i < frames; ++i)
+    for(j = 0; j < n; ++j) {
+      int index = (int)features[i][j][0];
+      float x = features[i][j][2];
+      float y = features[i][j][3];
+      fprintf(f, "%d %d %f %f\n", i, index, x, y);
+    }
+
+  // The number of zeros to print afterwards
+  int zeros = nFrames * 9 + points * 3;
+
+  for(i = 0; i < zeros; ++i)
+    fprintf(f, "0\n");
+
+  fclose(f);
 }
 
 int main(int argc, char** argv) {
@@ -40,7 +90,6 @@ int main(int argc, char** argv) {
   KLT_FeatureList fl;
   KLT_FeatureTable ft;
 
-  int nFeatures = 100, nFrames = 8;
   int ncols, nrows;
   int i;
   int j;
@@ -82,9 +131,9 @@ int main(int argc, char** argv) {
     //store information in temperary variable
     float temp [nFeatures][3];
     for (j = 0 ; j < fl->nFeatures ; j++)  {
-	     temp[j][0] = fl->feature[j]->x;
-	     temp[j][1] = fl->feature[j]->y;
-	     temp[j][2] = fl->feature[j]->val;
+       temp[j][0] = fl->feature[j]->x;
+       temp[j][1] = fl->feature[j]->y;
+       temp[j][2] = fl->feature[j]->val;
     }
 
     //this replaces lost features with new features
@@ -95,10 +144,10 @@ int main(int argc, char** argv) {
     int currPosition = 0;
     for (j = 0 ; j < nFeatures ; j++) {
       if (temp[j][0] != -1) {
-	      allFeatures[i][currPosition][0] = allFeatures[prev][j][0];
-	      allFeatures[i][currPosition][1] = fl->feature[j]->x;
-	      allFeatures[i][currPosition][2] = fl->feature[j]->y;
-	      allFeatures[i][currPosition][3] = fl->feature[j]->val;
+        allFeatures[i][currPosition][0] = allFeatures[prev][j][0];
+        allFeatures[i][currPosition][1] = fl->feature[j]->x;
+        allFeatures[i][currPosition][2] = fl->feature[j]->y;
+        allFeatures[i][currPosition][3] = fl->feature[j]->val;
         ++currPosition;
       }
     }
@@ -106,12 +155,12 @@ int main(int argc, char** argv) {
     float featureNum = allFeatures[prev][(nFeatures-1)][0]+1;
     for (j = 0 ; j < nFeatures ; j++) {
       if (temp[j][0] == -1) {
-	      allFeatures[i][currPosition][0] = featureNum;
-	      allFeatures[i][currPosition][1] = fl->feature[j]->x;
-	      allFeatures[i][currPosition][2] = fl->feature[j]->y;
-	      allFeatures[i][currPosition][3] = fl->feature[j]->val;
-	      ++currPosition;
-	      ++featureNum;
+        allFeatures[i][currPosition][0] = featureNum;
+        allFeatures[i][currPosition][1] = fl->feature[j]->x;
+        allFeatures[i][currPosition][2] = fl->feature[j]->y;
+        allFeatures[i][currPosition][3] = fl->feature[j]->val;
+        ++currPosition;
+        ++featureNum;
       }
     }
 
@@ -121,14 +170,18 @@ int main(int argc, char** argv) {
     KLTWriteFeatureListToPPM(fl, img2, ncols, nrows, fnameout);
   }
 
-  //make table with feature info
-  KLTWriteFeatureTable(ft, "features.txt", "%5.1f");
-  KLTWriteFeatureTable(ft, "features.ft", NULL);
+  if(DEBUG == 1) {
+    // Print the frames if we're in debug mode
+    for(i = 0; i < nFrames; ++i)
+      print_frame(i, nFeatures, allFeatures[i]);
 
-  // Print the frames if we're in debug mode
-  if(DEBUG == 1)
-    for(i = 0; i <nFrames; ++i)
-      printFrame(i, nFeatures, allFeatures[i]);
+    // We don't actually need these, so only save them
+    // if we're debugging
+    KLTWriteFeatureTable(ft, "features.txt", "%5.1f");
+    KLTWriteFeatureTable(ft, "features.ft", NULL);
+  }
+
+  output_ceres_file(allFeatures, nFrames, nFeatures, argv[2]);
 
   //free everthing
   KLTFreeFeatureTable(ft);
