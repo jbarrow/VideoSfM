@@ -1,14 +1,15 @@
-/**********************************************************************
-Finds the 150 best features in an image and tracks them through the 
-next two images.  The sequential mode is set in order to speed
-processing.  The features are stored in a feature table, which is then
-saved to a text file; each feature list is also written to a PPM file.
-**********************************************************************/
+/*
+ * track_features.c
+ *
+ * Created by: Charlotte Ellison
+ * Description: Track the features through the frames of a video, and
+ * create a new feature whenever you lose one.
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "pnmio.h"
-#include "klt.h"
+#include "klt/pnmio.h"
+#include "klt/klt.h"
 
 //This prints all the features in each frame
 void printFrame (float num, int nFeatures, float frame[][4]){
@@ -44,7 +45,7 @@ int main()
   tc->sequentialMode = TRUE;
   tc->writeInternalImages = FALSE;
   tc->affineConsistencyCheck = -1;  /* set this to 2 to turn on affine consistency check */
- 
+
  //get first image+allacate second image
   img1 = pgmReadFile("img0.pgm", NULL, &ncols, &nrows);
   img2 = (unsigned char *) malloc(ncols*nrows*sizeof(unsigned char));
@@ -53,7 +54,7 @@ int main()
   KLTSelectGoodFeatures(tc, img1, ncols, nrows, fl);
   KLTStoreFeatureList(fl, ft, 0);
   KLTWriteFeatureListToPPM(fl, img1, ncols, nrows, "feat0.ppm");
-  
+
   //insert first frame info into array
   for (j = 0 ; j < fl->nFeatures ; j++)  {
     allFeatures[0][j][0] = j;
@@ -66,7 +67,7 @@ int main()
     sprintf(fnamein, "img%d.pgm", i);
     pgmReadFile(fnamein, img2, &ncols, &nrows);
     KLTTrackFeatures(tc, img1, img2, ncols, nrows, fl);
-    
+
     //store information in temperary variable
     float temp [nFeatures][3];
     for (j = 0 ; j < fl->nFeatures ; j++)  {
@@ -76,7 +77,7 @@ int main()
      }
 
     KLTReplaceLostFeatures(tc, img2, ncols, nrows, fl);	//this replaces lost features with new features
-    
+
     //update array with correct points
     int prev = i-1;
     int currPosition = 0;
@@ -100,17 +101,17 @@ int main()
 	++featureNum;
       }
     }
-    
+
     //put features in table structure and add to image
     KLTStoreFeatureList(fl, ft, i);
     sprintf(fnameout, "feat%d.ppm", i);
     KLTWriteFeatureListToPPM(fl, img2, ncols, nrows, fnameout);
   }
-  
+
   //make table with feature info
   KLTWriteFeatureTable(ft, "featuresEdited2.txt", "%5.1f");
   KLTWriteFeatureTable(ft, "featuresEdited2.ft", NULL);
-  
+
   int k = 0;
   for(k = 0; k <nFrames; ++k){
     printFrame(k, nFeatures, allFeatures[k]);
