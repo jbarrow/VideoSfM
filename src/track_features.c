@@ -27,6 +27,18 @@ void print_frame (int num, int nFeatures, float frame[][4]) {
      }
 }
 
+int find_max_point(float features[nFrames][nFeatures][4]) {
+  // The point number is located in index [0] of every feature.
+  float max = 0;
+  int i, j;
+
+  for(i = 0; i < nFrames; ++i)
+    for(j = 0; j < nFeatures; ++j)
+      max = features[i][j][0] > max ? features[i][j][0] : max;
+
+  return (int)max;
+}
+
 void output_ceres_file(float features[nFrames][nFeatures][4], int frames, int n, char* directory) {
   char output[512];
   sprintf(output, "%s/features.txt", directory);
@@ -40,7 +52,7 @@ void output_ceres_file(float features[nFrames][nFeatures][4], int frames, int n,
   }
 
   int observations = frames * n;
-  int points = features[nFrames-1][nFeatures-1][0];
+  int points = find_max_point(features);
 
   /*
    * The first line has the format:
