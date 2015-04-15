@@ -73,8 +73,8 @@ void output_ceres_file(float features[nFrames][nFeatures][4], int frames, int n,
   for(i = 0; i < frames; ++i)
     for(j = 0; j < n; ++j) {
       int index = (int)features[i][j][0];
-      float x = features[i][j][2];
-      float y = features[i][j][3];
+      float x = features[i][j][1];
+      float y = features[i][j][2];
       fprintf(f, "%d %d %f %f\n", i, index, x, y);
     }
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
   float allFeatures[nFrames][nFeatures][4];
 
   sprintf(fnamein, "%s/image-%07d.pgm", argv[1], 1);
-  sprintf(fnameout, "%s/feature-%07d.pgm", argv[1], 1);
+  sprintf(fnameout, "%s/feature-%07d.pgm", argv[2], 1);
 
   //initialize KLT stuff
   tc = KLTCreateTrackingContext();
