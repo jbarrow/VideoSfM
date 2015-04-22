@@ -10,3 +10,5 @@ cd src && make
 cd ../
 
 ./track_features $2 $2
+
+python src/sfm.py $2

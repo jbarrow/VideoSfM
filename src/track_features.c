@@ -15,7 +15,7 @@
 
 #define DEBUG 0
 
-int nFeatures = 100, nFrames = 8;
+int nFeatures = 300, nFrames = 200;
 
 //This prints all the features in each frame
 void print_frame (int num, int nFeatures, float frame[][4]) {
@@ -79,10 +79,10 @@ void output_ceres_file(float features[nFrames][nFeatures][4], int frames, int n,
     }
 
   // The number of zeros to print afterwards
-  int zeros = nFrames * 9 + points * 3;
+  //int zeros = nFrames * 9 + points * 3;
 
-  for(i = 0; i < zeros; ++i)
-    fprintf(f, "0\n");
+  //for(i = 0; i < zeros; ++i)
+  //  fprintf(f, "0\n");
 
   fclose(f);
 }

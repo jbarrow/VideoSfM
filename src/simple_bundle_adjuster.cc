@@ -212,12 +212,12 @@ int main(int argc, char** argv) {
   options.minimizer_progress_to_stdout = true;
 
   ceres::Solver::Summary summary;
-  
+
   //******************* STUFF I ADDED
   //I am trying to access the 3d coodiniates of the points both before and after the solver runs
   //I think we need to use the .mutable_point_for_observation(i) function but I'm not sure how
   //I think the bal_problem.cc might also be of interest
-  
+
   //x, y, z for first 100 points- their initial values-  Compare them to the first 100 point parameters in the .txt file you are running- it should match up
   int i = 0;
   std::cout <<"INITIAL VALUES\n";
@@ -235,4 +235,3 @@ int main(int argc, char** argv) {
   }
   return 0;
 }
-v
